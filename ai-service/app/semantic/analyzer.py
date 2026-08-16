@@ -1,7 +1,8 @@
 import json
 
-from ..schemas import AnalyzeRequest, AnalyzeResponse, Entity, Insight, SyntaxIssue
+from ..schemas import AnalyzeRequest, AnalyzeResponse, Entity, Insight, SyntaxIssue, VisualizationSpec
 from . import detectors
+from .visualize import build_visualization
 
 
 def analyze_node(node_id: str, node_type: str, content, style: dict) -> AnalyzeResponse:
@@ -20,6 +21,7 @@ def analyze_node(node_id: str, node_type: str, content, style: dict) -> AnalyzeR
     is_math = False
     math_expression: str | None = None
     symbols: set[str] = set()
+    visualization: VisualizationSpec | None = None
 
     if node_type == "code":
         hint = (style or {}).get("language")
@@ -44,6 +46,7 @@ def analyze_node(node_id: str, node_type: str, content, style: dict) -> AnalyzeR
         is_math, math_expression, symbols = detectors.detect_math(content)
         domain, domain_confidence = detectors.detect_domain(content, is_math=True, symbols=symbols)
         entities = detectors.extract_entities(content)
+        visualization = build_visualization(content)
         for symbol in sorted(symbols)[:6]:
             entities.append(Entity(text=symbol, type="math_symbol", confidence=0.8))
         insights.append(Insight(text="Recognized as a mathematical expression.", type="observation"))
@@ -53,6 +56,7 @@ def analyze_node(node_id: str, node_type: str, content, style: dict) -> AnalyzeR
         is_math, math_expression, symbols = detectors.detect_math(content)
         domain, domain_confidence = detectors.detect_domain(content, is_math=is_math, symbols=symbols)
         entities = detectors.extract_entities(content)
+        visualization = build_visualization(content)
         if is_math and domain:
             insights.append(Insight(text=f"Contains math, classified as {domain}.", type="category"))
         elif domain:
@@ -80,6 +84,7 @@ def analyze_node(node_id: str, node_type: str, content, style: dict) -> AnalyzeR
         is_math=is_math,
         math_expression=math_expression,
         insights=insights,
+        visualization=visualization,
     )
 
 

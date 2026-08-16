@@ -36,6 +36,10 @@ pub fn router(state: Arc<AppState>) -> Router {
         .route("/api/nodes/{id}", put(nodes::update).delete(nodes::delete))
         .route("/api/boards/{id}/analyze", post(semantics::analyze))
         .route(
+            "/api/boards/{id}/visualize",
+            post(semantics::visualize),
+        )
+        .route(
             "/api/boards/{id}/relationships",
             get(semantics::relationships),
         )

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
-from .routers import code, llm, math, semantic
+from .routers import code, llm, math, semantic, visualize
 
 app = FastAPI(
     title="MeBoard AI Service",
@@ -22,6 +22,7 @@ app.include_router(semantic.router)
 app.include_router(math.router)
 app.include_router(code.router)
 app.include_router(llm.router)
+app.include_router(visualize.router)
 
 
 @app.get("/health", tags=["meta"])

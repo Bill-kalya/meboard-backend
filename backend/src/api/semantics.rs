@@ -59,6 +59,47 @@ pub async fn analyze(
     Ok(Json(profile))
 }
 
+/// Proxy a node's content to the ai-service equation classifier and return a
+/// visualization spec (2D/3D plot, quantum state, circuit, ...) for the HUD.
+pub async fn visualize(
+    Path(board_id): Path<Uuid>,
+    State(state): State<SharedState>,
+    Json(request): Json<AnalyzeNodeRequest>,
+) -> AppResult<Json<serde_json::Value>> {
+    let node = get_node(&state, request.node_id).await?;
+    if node.board_id != board_id {
+        return Err(AppError::BadRequest("node does not belong to board".to_string()));
+    }
+
+    let payload = serde_json::json!({
+        "node_id": node.id.to_string(),
+        "node_type": node.node_type,
+        "content": node.content,
+        "style": node.style,
+    });
+
+    let client = ai_client().await?;
+    let response = client
+        .post(format!("{}/visualize", state.ai_url))
+        .json(&payload)
+        .send()
+        .await
+        .map_err(|e| AppError::Upstream(format!("ai-service unreachable: {e}")))?;
+
+    if !response.status().is_success() {
+        return Err(AppError::Upstream(format!(
+            "ai-service returned {}",
+            response.status()
+        )));
+    }
+    let spec: serde_json::Value = response
+        .json()
+        .await
+        .map_err(|e| AppError::Upstream(format!("bad ai-service response: {e}")))?;
+
+    Ok(Json(spec))
+}
+
 pub async fn relationships(
     Path(board_id): Path<Uuid>,
     State(state): State<SharedState>,

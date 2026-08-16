@@ -35,6 +35,37 @@ class AnalyzeRequest(BaseModel):
     style: dict[str, Any] = Field(default_factory=dict)
 
 
+class VisualizeRequest(BaseModel):
+    node_id: str
+    node_type: str = "text"
+    content: str = ""
+    style: dict[str, Any] = Field(default_factory=dict)
+
+
+class ParamSpec(BaseModel):
+    name: str
+    default: float = 1.0
+    min: float = -5.0
+    max: float = 5.0
+    step: float = 0.1
+
+
+class VisualizationSpec(BaseModel):
+    category: str = "none"
+    plot_type: Literal["2d", "3d", "special", "none"] = "none"
+    expression: str = ""
+    function: Optional[str] = None
+    variables: list[str] = Field(default_factory=list)
+    parameters: list[ParamSpec] = Field(default_factory=list)
+    ranges: dict[str, list[float]] = Field(default_factory=dict)
+    animated: bool = False
+    animation: Optional[str] = None
+    level: int = 1
+    title: str = ""
+    subtitle: Optional[str] = None
+    extra: dict[str, Any] = Field(default_factory=dict)
+
+
 class AnalyzeResponse(BaseModel):
     node_id: str
     node_type: str
@@ -48,6 +79,7 @@ class AnalyzeResponse(BaseModel):
     is_math: bool = False
     math_expression: Optional[str] = None
     insights: list[Insight] = Field(default_factory=list)
+    visualization: Optional[VisualizationSpec] = None
 
 
 class NodeBrief(BaseModel):
