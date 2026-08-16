@@ -1,0 +1,15 @@
+target/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+*.log
+.postgres_data/
+.redis_data/
+.neo4j_data/
+.ollama_data/
+.DS_Store
+.vscode/
+.idea/

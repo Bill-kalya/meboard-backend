@@ -1,0 +1,7 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+watchPatterns = ["ai-service/**"]
+
+[deploy]
+healthcheckPath = "/health"
